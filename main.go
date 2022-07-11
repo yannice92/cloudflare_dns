@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -106,6 +107,10 @@ func main() {
 			var dns updateDNS
 			if res.Type == "A" {
 				log.Println(fmt.Sprintf("Zone %s", res.Name))
+				if publicIP == res.Content {
+					log.Println(fmt.Sprintf("Skip Update Zone %s. Same IP!", res.Name))
+					continue
+				}
 				dns.Type = "A"
 				dns.Name = res.Name
 				dns.Ttl = 600
@@ -156,6 +161,6 @@ func getPublicIP() string {
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
-	bodyString := string(body)
+	bodyString := strings.TrimSpace(string(body))
 	return bodyString
 }
