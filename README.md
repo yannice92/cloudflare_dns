@@ -1,5 +1,7 @@
 update your public IP to A record on DNS cloudflare
 
+**Warning: it will update all your A records to existing public IP**
+
 ## Requirement
 * go 1.18
 
