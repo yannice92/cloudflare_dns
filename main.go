@@ -74,6 +74,16 @@ type updateDNSResponse struct {
 	Messages []interface{} `json:"messages"`
 }
 
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -102,11 +112,17 @@ func main() {
 	}
 	publicIP := getPublicIP()
 	log.Println("Public IP:", publicIP)
+	skipRecords := os.Getenv("SKIP_DOMAIN")
+	skipRecordsArr := strings.Split(skipRecords, ";")
 	if data.Success {
 		for _, res := range data.Result {
+			log.Println(fmt.Sprintf("Zone %s", res.Name))
+			if contains(skipRecordsArr, res.Name) {
+				log.Println(fmt.Sprintf("Skip Update Zone %s. Cause on SKIP_DOMAIN list!", res.Name))
+				continue
+			}
 			var dns updateDNS
 			if res.Type == "A" {
-				log.Println(fmt.Sprintf("Zone %s", res.Name))
 				if publicIP == res.Content {
 					log.Println(fmt.Sprintf("Skip Update Zone %s. Same IP!", res.Name))
 					continue
